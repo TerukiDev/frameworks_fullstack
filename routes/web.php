@@ -18,7 +18,7 @@ Route::get('dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-require __DIR__.'/settings.php';
+require __DIR__ . '/settings.php';
 
 Route::get('test', [HomeController::class, 'test'])->name('test');
 
@@ -36,4 +36,9 @@ Route::prefix('tracks')->name('tracks.')->group(function () {
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('playlists', PlaylistController::class)->except('show');
+    Route::resource('api-keys', \App\Http\Controllers\ApiKeyController::class)->except(['show']);
+});
+
+Route::prefix('api')->middleware([\App\Http\Middleware\CheckApiKey::class])->group(function () {
+    Route::get('/playlists', [\App\Http\Controllers\Api\PlaylistController::class, 'index']);
 });

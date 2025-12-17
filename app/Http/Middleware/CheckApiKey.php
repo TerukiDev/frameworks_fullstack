@@ -2,12 +2,13 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\ApiKey;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
-class IsAdmin
+class CheckApiKey
 {
     /**
      * Handle an incoming request.
@@ -16,9 +17,20 @@ class IsAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (! Auth::user()?->is_admin) {
-            return redirect()->route('tracks.index');
+        $key = $request->header('x-api-key');
+
+        if (!$key) {
+            return response()->json(['message' => 'API Key missing'], 401);
         }
+
+        $apiKey = ApiKey::where('key', $key)->first();
+
+        if (!$apiKey) {
+            return response()->json(['message' => 'Invalid API Key'], 401);
+        }
+
+        // Log the user in for this request
+        Auth::login($apiKey->user);
 
         return $next($request);
     }

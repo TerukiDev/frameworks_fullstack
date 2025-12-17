@@ -30,20 +30,20 @@ class TrackController extends Controller
             'title' => ['required', 'string', 'max:255'],
             'artist' => ['required', 'string', 'max:255'],
             'image' => ['required', 'image'],
-            'music' => ['required', 'file', 'mimes:wav,mp3'],
+            'audio' => ['required', 'file', 'mimes:wav,mp3'],
         ]);
 
         $slug = 'trk-' . Str::uuid();
 
         $imagePath = $request->image->storeAs('tracks/images', $slug . '.' . $request->image->extension());
-        $musicPath = $request->music->storeAs('tracks/musics', $slug . '.' . $request->music->extension());
+        $audioPath = $request->audio->storeAs('tracks/audios', $slug . '.' . $request->audio->extension());
 
         Track::create([
             'slug' => $slug,
             'title' => $request->title,
             'artist' => $request->artist,
             'image' => $imagePath,
-            'audio' => $musicPath,
+            'audio' => $audioPath,
         ]);
 
         // return redirect()->back();

@@ -1,11 +1,11 @@
 <template>
     <MusicLayout>
-        <template #title>
-            Créer une playlist
-        </template>
+        <template #title> Créer une playlist </template>
 
         <template #actions>
-            <Link :href="route('playlists.index')" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Retour</Link>
+            <Button as-child variant="outline">
+                <Link :href="route('playlists.index')">Retour</Link>
+            </Button>
         </template>
 
         <template #content>
@@ -15,19 +15,21 @@
 </template>
 
 <script>
-    import MusicLayout from '@/layouts/MusicLayout.vue';
-    import { Link } from '@inertiajs/vue3';
-    import PlaylistForm from '@/components/Playlists/PlaylistForm.vue';
+import PlaylistForm from '@/components/Playlists/PlaylistForm.vue';
+import Button from '@/components/ui/button/Button.vue';
+import MusicLayout from '@/layouts/MusicLayout.vue';
+import { Link } from '@inertiajs/vue3';
 
-    export default {
-        name: 'Create',
-        components: {
-            Link,
-            MusicLayout,
-            PlaylistForm,
-        },
-        props: {
-            tracks: Array,
-        },
-    }
+export default {
+    name: 'Create',
+    components: {
+        Link,
+        Button,
+        MusicLayout,
+        PlaylistForm,
+    },
+    props: {
+        tracks: Array,
+    },
+};
 </script>

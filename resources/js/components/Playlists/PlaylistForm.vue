@@ -1,73 +1,103 @@
 <template>
     <form @submit.prevent="submit">
-        <div class="mb-4">
-            <label class="block text-gray-700 text-sm font-bold mb-2" for="title">
-                Titre
-            </label>
-            <input
-                id="title"
-                v-model="form.title"
-                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                :class="{ 'border-red-500': form.errors.title }"
-                type="text"
-                placeholder="Title"
-            >
-            <small class="text-red-500">{{ form.errors.title }}</small>
-        </div>
+        <Card>
+            <CardContent class="space-y-5">
+                <div class="space-y-2">
+                    <Label for="title">Titre</Label>
+                    <Input
+                        id="title"
+                        v-model="form.title"
+                        type="text"
+                        placeholder="Titre"
+                        :aria-invalid="!!form.errors.title"
+                    />
+                    <InputError :message="form.errors.title" />
+                </div>
 
-        <div class="mb-4">
-            <label class="block text-gray-700 text-sm font-bold mb-2">
-                Musiques
-            </label>
+                <div class="space-y-2">
+                    <Label>Musiques</Label>
 
-            <div
-                v-for="track in tracks"
-                :key="track.slug"
-            >
-                <input
-                    :id="'tracks_' + track.slug"
-                    v-model="form.tracks"
-                    type="checkbox"
-                    name="tracks"
-                    :value="track.slug"
-                    class="mr-3"
-                >
-                <label :for="'tracks_' + track.slug">{{ track.title }}</label>
-            </div>
-        </div>
+                    <div class="grid gap-2 sm:grid-cols-2">
+                        <div v-for="track in tracks" :key="track.slug">
+                            <input
+                                :id="'tracks_' + track.slug"
+                                v-model="form.tracks"
+                                type="checkbox"
+                                name="tracks"
+                                :value="track.slug"
+                                class="peer sr-only"
+                            />
+                            <label
+                                :for="'tracks_' + track.slug"
+                                class="flex cursor-pointer items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm transition-colors peer-checked:border-primary peer-checked:bg-primary/10 hover:bg-muted/20"
+                            >
+                                <span class="line-clamp-1">{{
+                                    track.title
+                                }}</span>
+                                <span
+                                    class="text-xs text-primary opacity-0 transition-opacity peer-checked:opacity-100"
+                                >
+                                    Sélectionné
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
 
-        <input
-            type="submit"
-            :value="playlist ? 'Modifier la playlist' : 'Créer la playlist'"
-            :disabled="form.processing"
-            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-        >
+                <div class="flex items-center gap-3">
+                    <Button :disabled="form.processing">
+                        {{
+                            playlist
+                                ? 'Modifier la playlist'
+                                : 'Créer la playlist'
+                        }}
+                    </Button>
+                </div>
+            </CardContent>
+        </Card>
     </form>
 </template>
 
 <script>
-    export default {
-        name: 'PlaylistForm',
-        props: {
-            playlist: Object,
-            tracks: Array,
-        },
-        data() {
-            return {
-                form: this.$inertia.form({
-                    title: this.playlist?.title ?? '',
-                    tracks: this.playlist?.tracks.map(track => track.slug) ?? [],
-                }),
+import InputError from '@/components/InputError.vue';
+import Button from '@/components/ui/button/Button.vue';
+import Card from '@/components/ui/card/Card.vue';
+import CardContent from '@/components/ui/card/CardContent.vue';
+import Input from '@/components/ui/input/Input.vue';
+import Label from '@/components/ui/label/Label.vue';
+
+export default {
+    name: 'PlaylistForm',
+    components: {
+        Button,
+        Card,
+        CardContent,
+        Input,
+        InputError,
+        Label,
+    },
+    props: {
+        playlist: Object,
+        tracks: Array,
+    },
+    data() {
+        return {
+            form: this.$inertia.form({
+                title: this.playlist?.title ?? '',
+                tracks: this.playlist?.tracks?.map((track) => track.slug) ?? [],
+            }),
+        };
+    },
+    methods: {
+        submit() {
+            if (this.playlist) {
+                this.form.put(
+                    route('playlists.update', { playlist: this.playlist }),
+                );
+            } else {
+                this.form.post(route('playlists.store'));
             }
         },
-        methods: {
-            submit() {
-                if (this.playlist) {
-                    this.form.put(route('playlists.update', { playlist: this.playlist }));
-                } else {
-                    this.form.post(route('playlists.store'));
-                }
-            }
-        }
-    }
+    },
+};
 </script>

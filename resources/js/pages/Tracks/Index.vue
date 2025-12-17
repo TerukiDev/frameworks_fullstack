@@ -1,30 +1,25 @@
 <template>
     <MusicLayout>
-        <template #title>
-            Liste des musiques
-        </template>
+        <template #title> Liste des musiques </template>
 
         <template #actions>
-            <Link
-                v-if="$page.props.auth.user?.admin"
-                :href="route('tracks.create')"
-                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-            >
-                Créer une musique
-            </Link>
+            <Button v-if="$page.props.isAdmin" as-child>
+                <Link :href="route('tracks.create')">Créer une musique</Link>
+            </Button>
         </template>
 
         <template #content>
-            <input
-                id="search"
-                v-model="search"
-                type="search"
-                name="search"
-                class="shadow appearance-none border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-5"
-                placeholder="Rechercher..."
-            >
+            <div class="mb-5 max-w-md">
+                <Input
+                    id="search"
+                    v-model="search"
+                    type="search"
+                    name="search"
+                    placeholder="Rechercher..."
+                />
+            </div>
 
-            <div class="grid grid-cols-4 gap-4">
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <Track
                     v-for="track in filteredTracks"
                     :key="track.slug"
@@ -37,50 +32,56 @@
 </template>
 
 <script>
-    import MusicLayout from '@/layouts/MusicLayout.vue';
-    import Track from '@/components/Tracks/Track.vue';
-    import { Link } from '@inertiajs/vue3';
+import Track from '@/components/Tracks/Track.vue';
+import Button from '@/components/ui/button/Button.vue';
+import Input from '@/components/ui/input/Input.vue';
+import MusicLayout from '@/layouts/MusicLayout.vue';
+import { Link } from '@inertiajs/vue3';
 
-    export default {
-        name: 'Index',
-        components: {
-            Link,
-            MusicLayout,
-            Track,
+export default {
+    name: 'Index',
+    components: {
+        Link,
+        Button,
+        Input,
+        MusicLayout,
+        Track,
+    },
+    props: {
+        tracks: Array,
+    },
+    data() {
+        return {
+            audio: null,
+            currentAudio: null,
+            search: '',
+        };
+    },
+    computed: {
+        filteredTracks() {
+            return this.tracks.filter((track) =>
+                track.title.toLowerCase().includes(this.search.toLowerCase()),
+            );
         },
-        props: {
-            tracks: Array,
+    },
+    methods: {
+        changeCurrentAudio(track) {
+            this.audio = new Audio('/storage/' + track.audio);
+            this.audio.play();
+            this.currentAudio = track.slug;
         },
-        data() {
-            return {
-                audio: null,
-                currentAudio: null,
-                search: '',
-            }
-        },
-        computed: {
-            filteredTracks() {
-                return this.tracks.filter(track => track.title.toLowerCase().includes(this.search.toLowerCase()));
-            },
-        },
-        methods: {
-            changeCurrentAudio() {
-                this.audio = new Audio('/storage/' + track.audio);
+        handleListen(track) {
+            if (!this.audio) {
+                this.changeCurrentAudio(track);
+            } else if (track.slug !== this.currentAudio) {
+                this.audio.pause();
+                this.changeCurrentAudio(track);
+            } else if (this.audio.paused) {
                 this.audio.play();
-                this.currentAudio = track.slug;
-            },
-            handleListen(track) {
-                if (! this.audio) {
-                    this.changeCurrentAudio();
-                } else if (track.slug !== this.currentAudio) {
-                    this.audio.pause();
-                    this.changeCurrentAudio();
-                } else if (this.audio.paused) {
-                    this.audio.play();
-                } else {
-                    this.audio.pause();
-                }
+            } else {
+                this.audio.pause();
             }
         },
-    }
+    },
+};
 </script>

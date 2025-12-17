@@ -1,57 +1,68 @@
 <template>
     <div
-        class="max-w-sm rounded overflow-hidden shadow-lg cursor-pointer"
+        class="group cursor-pointer overflow-hidden rounded-xl border bg-card text-card-foreground shadow-sm transition-colors hover:bg-muted/20 active:scale-[0.99]"
         @click="handleClick"
     >
-      <div class="w-full h-1/2">
-        <img class="w-full h-full" :src="`/storage/${track.image}`">
-      </div>
-      <div class="px-6 py-4">
-        <div class="font-bold text-xl mb-2">{{ track.title }}</div>
-        <small class="text-gray-700 text-base">
-          {{ track.artist }}
-        </small>
-      </div>
-        <div class="mt-3 grid grid-cols-2 gap-2">
-            <Link
-                v-if="$page.props.isAdmin"
-                :href="route('tracks.edit', { track: track })"
-                class="bg-transparent hover:bg-green-500 text-green-700 font-semibold hover:text-white py-2 px-4 border border-green-500 hover:border-transparent rounded text-center"
-            >
-            Modifier
-            </Link>
-            <span
-                v-if="$page.props.isAdmin"
-                @click="destroy"
-                class="bg-transparent hover:bg-red-500 text-red-700 font-semibold hover:text-white py-2 px-4 border border-red-500 hover:border-transparent rounded text-center"
-            >
-            Supprimer
-            </span>
+        <div class="relative aspect-[1/1] w-full overflow-hidden">
+            <img
+                class="h-full w-full object-cover transition-transform duration-200 group-hover:scale-[1.02]"
+                :src="`/storage/${track.image}`"
+                :alt="track.title"
+            />
+        </div>
+
+        <div class="space-y-1 p-4">
+            <div class="line-clamp-1 text-base font-semibold">
+                {{ track.title }}
+            </div>
+            <div class="line-clamp-1 text-sm text-muted-foreground">
+                {{ track.artist }}
+            </div>
+        </div>
+
+        <div
+            v-if="$page.props.isAdmin"
+            class="grid grid-cols-2 gap-2 px-4 pb-4"
+        >
+            <Button as-child variant="outline" @click.stop>
+                <Link :href="route('tracks.edit', { track: track })">
+                    Modifier
+                </Link>
+            </Button>
+
+            <Button variant="destructive" @click.stop="destroy">
+                Supprimer
+            </Button>
         </div>
     </div>
 </template>
 
 <script>
-    import { Link } from '@inertiajs/vue3';
+import Button from '@/components/ui/button/Button.vue';
+import { Link } from '@inertiajs/vue3';
 
-    export default {
-        name: 'Track',
-        emits: ['listen'],
-        components: {
-            Link,
-        },
-        props: {
-            track: Object,
-        },
-        methods: {
-            destroy() {
-                this.$inertia.delete(route('tracks.destroy', { track: this.track }), {
+export default {
+    name: 'Track',
+    emits: ['listen'],
+    components: {
+        Link,
+        Button,
+    },
+    props: {
+        track: Object,
+    },
+    methods: {
+        destroy() {
+            this.$inertia.delete(
+                route('tracks.destroy', { track: this.track }),
+                {
                     preserveScroll: true,
-                });
-            },
-            handleClick() {
-                this.$emit('listen', this.track);
-            }
-        }
-    }
+                },
+            );
+        },
+        handleClick() {
+            this.$emit('listen', this.track);
+        },
+    },
+};
 </script>

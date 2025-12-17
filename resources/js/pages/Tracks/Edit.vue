@@ -1,81 +1,102 @@
 <template>
     <MusicLayout>
-        <template #title>
-            Modifier la musique {{ track.title }}
-        </template>
+        <template #title> Modifier la musique {{ track.title }} </template>
 
         <template #actions>
-            <Link :href="route('tracks.index')" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Retour</Link>
+            <Button as-child variant="outline">
+                <Link :href="route('tracks.index')">Retour</Link>
+            </Button>
         </template>
 
         <template #content>
-            <form @submit.prevent="submit">
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="title">
-                        Titre
-                    </label>
-                    <input
-                        id="title"
-                        v-model="form.title"
-                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                        :class="{ 'border-red-500': form.errors.title }"
-                        type="text"
-                        placeholder="Title"
-                    >
-                    <small class="text-red-500">{{ form.errors.title }}</small>
-                </div>
+            <Card class="max-w-xl">
+                <CardHeader>
+                    <CardTitle>Modifier la musique</CardTitle>
+                    <CardDescription>
+                        Mets à jour le titre et l'artiste.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent class="space-y-5">
+                    <form @submit.prevent="submit" class="space-y-5">
+                        <div class="space-y-2">
+                            <Label for="title">Titre</Label>
+                            <Input
+                                id="title"
+                                v-model="form.title"
+                                type="text"
+                                placeholder="Titre"
+                                :aria-invalid="!!form.errors.title"
+                            />
+                            <InputError :message="form.errors.title" />
+                        </div>
 
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="artist">
-                        Artiste
-                    </label>
-                    <input
-                        id="artist"
-                        v-model="form.artist"
-                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                        :class="{ 'border-red-500': form.errors.artist }"
-                        type="text"
-                        placeholder="Artiste"
-                    >
-                    <small class="text-red-500">{{ form.errors.artist }}</small>
-                </div>
+                        <div class="space-y-2">
+                            <Label for="artist">Artiste</Label>
+                            <Input
+                                id="artist"
+                                v-model="form.artist"
+                                type="text"
+                                placeholder="Artiste"
+                                :aria-invalid="!!form.errors.artist"
+                            />
+                            <InputError :message="form.errors.artist" />
+                        </div>
 
-                <input
-                    type="submit"
-                    value="Modifier la musique"
-                    :disabled="form.processing"
-                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                >
-            </form>
+                        <div class="flex items-center gap-3">
+                            <Button :disabled="form.processing"
+                                >Modifier la musique</Button
+                            >
+                        </div>
+                    </form>
+                </CardContent>
+            </Card>
         </template>
     </MusicLayout>
 </template>
 
 <script>
-    import MusicLayout from '@/layouts/MusicLayout.vue';
-    import { Link } from '@inertiajs/vue3';
+import InputError from '@/components/InputError.vue';
+import Button from '@/components/ui/button/Button.vue';
+import Card from '@/components/ui/card/Card.vue';
+import CardContent from '@/components/ui/card/CardContent.vue';
+import CardDescription from '@/components/ui/card/CardDescription.vue';
+import CardHeader from '@/components/ui/card/CardHeader.vue';
+import CardTitle from '@/components/ui/card/CardTitle.vue';
+import Input from '@/components/ui/input/Input.vue';
+import Label from '@/components/ui/label/Label.vue';
+import MusicLayout from '@/layouts/MusicLayout.vue';
+import { Link } from '@inertiajs/vue3';
 
-    export default {
-        name: 'Edit',
-        components: {
-            Link,
-            MusicLayout,
+export default {
+    name: 'Edit',
+    components: {
+        Link,
+        Button,
+        Card,
+        CardDescription,
+        CardContent,
+        CardHeader,
+        CardTitle,
+        Input,
+        InputError,
+        Label,
+        MusicLayout,
+    },
+    props: {
+        track: Object,
+    },
+    data() {
+        return {
+            form: this.$inertia.form({
+                title: this.track.title,
+                artist: this.track.artist,
+            }),
+        };
+    },
+    methods: {
+        submit() {
+            this.form.put(route('tracks.update', { track: this.track }));
         },
-        props: {
-            track: Object,
-        },
-        data() {
-            return {
-                form: this.$inertia.form({
-                    title: this.track.title,
-                    artist: this.track.artist,
-                }),
-            }
-        },
-        methods: {
-            submit() {
-                this.form.put(route('tracks.update', { track: this.track }));
-            }
-        }
-    }
+    },
+};
 </script>

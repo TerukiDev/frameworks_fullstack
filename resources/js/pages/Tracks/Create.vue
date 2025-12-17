@@ -1,98 +1,124 @@
 <template>
     <MusicLayout>
-        <template #title>
-            Créer une musique
-        </template>
+        <template #title> Créer une musique </template>
 
         <template #actions>
-            <Link :href="route('tracks.index')" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Retour</Link>
+            <Button as-child variant="outline">
+                <Link :href="route('tracks.index')">Retour</Link>
+            </Button>
         </template>
 
         <template #content>
-            <form @submit.prevent="submit">
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="title">
-                        Titre
-                    </label>
-                    <input
-                        id="title"
-                        v-model="form.title"
-                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                        :class="{ 'border-red-500': form.errors.title }"
-                        type="text"
-                        placeholder="Title"
-                    >
-                    <small class="text-red-500">{{ form.errors.title }}</small>
-                </div>
+            <Card class="max-w-xl">
+                <CardHeader>
+                    <CardTitle>Nouvelle musique</CardTitle>
+                    <CardDescription>
+                        Renseigne le titre, l'artiste, une image et un fichier
+                        audio.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent class="space-y-5">
+                    <form @submit.prevent="submit" class="space-y-5">
+                        <div class="space-y-2">
+                            <Label for="title">Titre</Label>
+                            <Input
+                                id="title"
+                                v-model="form.title"
+                                type="text"
+                                placeholder="Titre"
+                                :aria-invalid="!!form.errors.title"
+                            />
+                            <InputError :message="form.errors.title" />
+                        </div>
 
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="artist">
-                        Artiste
-                    </label>
-                    <input
-                        id="artist"
-                        v-model="form.artist"
-                        class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                        :class="{ 'border-red-500': form.errors.artist }"
-                        type="text"
-                        placeholder="Artiste"
-                    >
-                    <small class="text-red-500">{{ form.errors.artist }}</small>
-                </div>
+                        <div class="space-y-2">
+                            <Label for="artist">Artiste</Label>
+                            <Input
+                                id="artist"
+                                v-model="form.artist"
+                                type="text"
+                                placeholder="Artiste"
+                                :aria-invalid="!!form.errors.artist"
+                            />
+                            <InputError :message="form.errors.artist" />
+                        </div>
 
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="artist">
-                        Image
-                    </label>
-                    <input type="file" name="image" id="image" @input="form.image = $event.target.files[0]">
-                    <small class="text-red-500">{{ form.errors.image }}</small>
-                </div>
+                        <div class="space-y-2">
+                            <Label for="image">Image</Label>
+                            <Input
+                                id="image"
+                                type="file"
+                                class="cursor-pointer"
+                                @change="form.image = $event.target.files[0]"
+                            />
+                            <InputError :message="form.errors.image" />
+                        </div>
 
-                <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="music">
-                        Audio
-                    </label>
-                    <input type="file" name="music" id="music" @input="form.music = $event.target.files[0]">
-                    <small class="text-red-500">{{ form.errors.music }}</small>
-                </div>
+                        <div class="space-y-2">
+                            <Label for="audio">Audio</Label>
+                            <Input
+                                id="audio"
+                                type="file"
+                                class="cursor-pointer"
+                                @change="form.audio = $event.target.files[0]"
+                            />
+                            <InputError :message="form.errors.audio" />
+                        </div>
 
-                <input
-                    type="submit"
-                    value="Créer la musique"
-                    :disabled="form.processing"
-                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                >
-            </form>
+                        <div class="flex items-center gap-3">
+                            <Button :disabled="form.processing"
+                                >Créer la musique</Button
+                            >
+                        </div>
+                    </form>
+                </CardContent>
+            </Card>
         </template>
     </MusicLayout>
 </template>
 
 <script>
-    import MusicLayout from '@/layouts/MusicLayout.vue';
-    import { Link } from '@inertiajs/vue3';
+import InputError from '@/components/InputError.vue';
+import Button from '@/components/ui/button/Button.vue';
+import Card from '@/components/ui/card/Card.vue';
+import CardContent from '@/components/ui/card/CardContent.vue';
+import CardDescription from '@/components/ui/card/CardDescription.vue';
+import CardHeader from '@/components/ui/card/CardHeader.vue';
+import CardTitle from '@/components/ui/card/CardTitle.vue';
+import Input from '@/components/ui/input/Input.vue';
+import Label from '@/components/ui/label/Label.vue';
+import MusicLayout from '@/layouts/MusicLayout.vue';
+import { Link } from '@inertiajs/vue3';
 
-    export default {
-        name: 'Create',
-        components: {
-            Link,
-            MusicLayout,
+export default {
+    name: 'Create',
+    components: {
+        Link,
+        Button,
+        Card,
+        CardDescription,
+        CardContent,
+        CardHeader,
+        CardTitle,
+        Input,
+        InputError,
+        Label,
+        MusicLayout,
+    },
+    data() {
+        return {
+            form: this.$inertia.form({
+                title: '',
+                artist: '',
+                image: null,
+                audio: null,
+            }),
+        };
+    },
+    methods: {
+        submit() {
+            this.form.post(route('tracks.store'));
         },
-        data() {
-            return {
-                form: this.$inertia.form({
-                    title: '',
-                    artist: '',
-                    image: null,
-                    music: null,
-                }),
-            }
-        },
-        methods: {
-            submit() {
-                // this.$inertia.post(route('tracks.store'), this.form);
-
-                this.form.post(route('tracks.store'));
-            }
-        }
-    }
+    },
+};
 </script>
